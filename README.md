@@ -1,5 +1,3 @@
-
-````markdown
 <div align="center">
 
 # 🇲🇦 Moroccan Darija Neural Machine Translation
@@ -12,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 <p align="center">
-  <b>A state-of-the-art Neural Machine Translation (NMT) system adapting Meta's NLLB-200 to low-resource Moroccan Darija (Moroccan Arabic) using Low-Rank Adaptation (LoRA).</b>
+  <b>A Neural Machine Translation (NMT) system adapting Meta's NLLB-200 to low-resource Moroccan Darija (Moroccan Arabic) using Low-Rank Adaptation (LoRA).</b>
 </p>
 
 [Explore Models on Hugging Face](https://huggingface.co/hamzabenX) • [Report Issue](https://github.com/hamzaX12/Lora_Fintune_NLLB/issues) • [Author Profile](https://github.com/hamzaX12)
@@ -26,7 +24,7 @@
 - [System Architecture](#-system-architecture)
 - [Datasets & Data Dictionary](#-datasets--data-dictionary)
 - [Repository Structure](#-repository-structure)
-- [LoRA Hyperparameters](#-lora-hyperparameters)
+- [LoRA Hyperparameters](#️-lora-hyperparameters)
 - [Installation & Setup](#-installation--setup)
 - [Training Pipeline](#-training-pipeline)
 - [Inference & Translation Usage](#-inference--translation-usage)
@@ -38,9 +36,9 @@
 
 ## 📌 Overview
 
-**Moroccan Darija** is a low-resource dialect characterized by non-standardized orthography, dialectal code-switching (Arabic, French, and Amazigh), and lack of formal parallel corpora. Standard commercial machine translation engines frequently produce hallucinations or incorrect Modern Standard Arabic (MSA) translations on conversational Darija.
+**Moroccan Darija** is a low-resource dialect characterized by non-standardized orthography, dialectal code-switching (Arabic, French, and Amazigh), and a scarcity of formal parallel corpora. Standard machine translation engines frequently produce hallucinations or inaccurate Modern Standard Arabic (MSA) outputs when translating conversational Darija.
 
-This repository implements **Parameter-Efficient Fine-Tuning (PEFT)** on **Meta's NLLB-200 (No Language Left Behind)** using **LoRA (Low-Rank Adaptation)**. By freezing over **99%** of the foundation model's weights and injecting trainable low-rank decomposition matrices into attention projection layers, this pipeline achieves high-fidelity translation with minimal computational overhead.
+This repository implements **Parameter-Efficient Fine-Tuning (PEFT)** on **Meta's NLLB-200 (No Language Left Behind)** using **LoRA (Low-Rank Adaptation)**. By freezing over **99%** of the foundation model's weights and injecting trainable low-rank decomposition matrices into the attention projection layers, this pipeline achieves high-fidelity translation with minimal computational overhead.
 
 ---
 
@@ -71,7 +69,7 @@ flowchart TD
 
     D1 --> P1
 
-    subgraph D3 ["3. Parameter-Efficient Fine-Tuning PEFT / LoRA"]
+    subgraph D3 ["3. Parameter-Efficient Fine-Tuning (PEFT / LoRA)"]
         direction TB
         B1["Pre-trained Base Models<br/>Meta NLLB-200 & Helsinki MarianMT"]
         L1["LoRA Adapter Injection<br/>q_proj, v_proj attention layers | Rank r=16, alpha=32"]
@@ -92,7 +90,7 @@ flowchart TD
 
     subgraph D5 ["5. Hugging Face Hub Deployment"]
         direction TB
-        H1[/"Hugging Face Hub Repositories<br/>7 Published Checkpoints & LoRA Adapters"/]
+        H1[/"Hugging Face Hub Repositories<br/>Published Checkpoints & LoRA Adapters"/]
     end
 
     E2 --> H1
@@ -112,16 +110,16 @@ The fine-tuning pipeline leverages curated subsets from two major parallel corpo
 
 | Dataset | Full Name | Primary Dialect Focus | Domain | Alignment |
 | :--- | :--- | :--- | :--- | :--- |
-| **DODA** | Darija Open Dataset for Applications | Moroccan Darija (Morocco) | Conversational, Daily life, Social | Darija ↔ English / French |
-| **MADAR** | Multi-Arabic Dialect Applications & Resources | Multi-dialect (BDI / Rabat / Casablanca) | Travel, Tourism, Queries | Darija ↔ MSA ↔ English |
+| **DODA** | Darija Open Dataset | Moroccan Darija (Morocco) | Conversational, Daily life, Social | Darija ↔ English / French |
+| **MADAR** | Multi-Arabic Dialect Applications & Resources | Multi-dialect (BTEC / Rabat / Fes) | Travel, Tourism, Queries | Darija ↔ MSA ↔ English |
 
 ### Corpus Schema
 
 | Column Name | Data Type | Description | Example |
 | :--- | :--- | :--- | :--- |
 | `source_text` | `string` | Raw or normalized source input | `"Fin ghadi t-mchi l-youm?"` |
-| `target_text` | `string` | High-quality reference translation | `"Where are you going today?"` |
-| `source_lang` | `string` | ISO language / NLLB tag | `ary_Arab` or `mor_Latn` |
+| `target_text` | `string` | Reference translation | `"Where are you going today?"` |
+| `source_lang` | `string` | NLLB language identifier | `ary_Arab` |
 | `target_lang` | `string` | Target NLLB language identifier | `eng_Latn` or `arb_Arab` |
 | `split` | `string` | Dataset partition | `train`, `validation`, `test` |
 
@@ -145,7 +143,7 @@ The fine-tuning pipeline leverages curated subsets from two major parallel corpo
 │   └── lora_config_v3.json        # LoRA rank, alpha, target modules, and learning rate
 ├── requirements.txt               # Python package dependencies
 ├── LICENSE                        # MIT License
-└── README.md                      # Comprehensive documentation
+└── README.md                      # Project documentation
 ```
 
 ---
@@ -158,7 +156,7 @@ For iteration 3 (`nllb-darija-lora_3`), the following parameter-efficient config
 | :--- | :--- | :--- |
 | **Base Model** | `facebook/nllb-200-distilled-600M` | Optimal trade-off between inference speed and translation capacity |
 | **LoRA Rank ($r$)** | `16` | Captures cross-lingual transfer without overfitting low-resource data |
-| **LoRA Alpha ($\alpha$)** | `32` | Scaling factor ($\alpha / r = 2.0$) for robust gradient updates |
+| **LoRA Alpha ($\alpha$)** | `32` | Scaling factor ($\alpha / r = 2.0$) for stable gradient updates |
 | **Target Modules** | `["q_proj", "v_proj"]` | Injects adapters directly into the Multi-Head Attention projections |
 | **LoRA Dropout** | `0.05` | Regularization against dialectal noise |
 | **Learning Rate** | `3e-4` | Linear warmup with cosine decay schedule |
@@ -171,7 +169,7 @@ For iteration 3 (`nllb-darija-lora_3`), the following parameter-efficient config
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/hamzaX12/Lora_Fintune_NLLB.git
+git clone [https://github.com/hamzaX12/Lora_Fintune_NLLB.git](https://github.com/hamzaX12/Lora_Fintune_NLLB.git)
 cd Lora_Fintune_NLLB
 
 # 2. Create and activate a virtual environment
@@ -188,7 +186,7 @@ pip install -r requirements.txt
 ### Key Dependencies
 ```txt
 torch>=2.0.0
-transformers>=4.38.0
+transformers>=4.41.0
 peft>=0.9.0
 datasets>=2.18.0
 evaluate>=0.4.1
@@ -204,15 +202,12 @@ accelerate>=0.28.0
 Run the training script to load the preprocessed DODA & MADAR parallel data, attach the LoRA adapters, and train:
 
 ```python
-# train.py
+# src/train.py
 import torch
-from datasets import load_dataset
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
     Seq2SeqTrainingArguments,
-    Seq2SeqTrainer,
-    DataCollatorForSeq2Seq
 )
 from peft import LoraConfig, get_peft_model, TaskType
 
@@ -246,7 +241,7 @@ training_args = Seq2SeqTrainingArguments(
     gradient_accumulation_steps=4,
     num_train_epochs=5,
     weight_decay=0.01,
-    evaluation_strategy="steps",
+    eval_strategy="steps",
     eval_steps=500,
     save_steps=500,
     save_total_limit=3,
@@ -273,7 +268,7 @@ base_model_name = "facebook/nllb-200-distilled-600M"
 adapter_checkpoint = "hamzabenX/nllb_200_darija_lora_dodamadar3"
 
 # 1. Load Tokenizer & Base Architecture
-tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+tokenizer = AutoTokenizer.from_pretrained(base_model_name, src_lang="ary_Arab")
 base_model = AutoModelForSeq2SeqLM.from_pretrained(
     base_model_name,
     torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
@@ -291,7 +286,7 @@ inputs = tokenizer(darija_text, return_tensors="pt").to(model.device)
 with torch.no_grad():
     generated_tokens = model.generate(
         **inputs,
-        forced_bos_token_id=tokenizer.lang_code_to_id["eng_Latn"],
+        forced_bos_token_id=tokenizer.convert_tokens_to_ids("eng_Latn"),
         max_length=64,
         num_beams=4,
         early_stopping=True
@@ -315,7 +310,7 @@ The models were evaluated on unseen validation splits from DODA and MADAR using 
 | `nllb-200-darija-lora-madar` | ~0.7% | 24.1 | 46.2 | ~46ms |
 | **`nllb-darija-lora_3` (DODA + MADAR)** | **~0.7%** | **27.4** | **49.8** | **~46ms** |
 
-*Note: SacreBLEU scores showed a significant +13.2 point gain over the un-adapted base model, with dramatic reductions in lexical hallucination.*
+*Note: SacreBLEU scores showed a +13.2 point gain over the un-adapted base model, with significant reductions in lexical hallucination.*
 
 ---
 
@@ -340,11 +335,10 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
   title = {Moroccan Darija Neural Machine Translation with NLLB-200 and LoRA},
   year = {2026},
   publisher = {GitHub},
-  howpublished = {\url{https://github.com/hamzaX12/Lora_Fintune_NLLB}}
+  howpublished = {\url{[https://github.com/hamzaX12/Lora_Fintune_NLLB](https://github.com/hamzaX12/Lora_Fintune_NLLB)}}
 }
 ```
 
 <div align="center">
   <sub>Developed by <a href="https://github.com/hamzaX12">Hamza Ben Allou</a> • Data Science & Analytics</sub>
 </div>
-````
